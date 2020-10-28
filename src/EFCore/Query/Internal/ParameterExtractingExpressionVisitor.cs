@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage;
 
+#nullable enable
+
 namespace Microsoft.EntityFrameworkCore.Query.Internal
 {
     /// <summary>
@@ -35,7 +37,7 @@ namespace Microsoft.EntityFrameworkCore.Query.Internal
             = new Dictionary<Expression, Expression>(ExpressionEqualityComparer.Instance);
 
         private IDictionary<Expression, bool> _evaluatableExpressions;
-        private IQueryProvider _currentQueryProvider;
+        private IQueryProvider? _currentQueryProvider;
 
         /// <summary>
         ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -58,10 +60,12 @@ namespace Microsoft.EntityFrameworkCore.Query.Internal
             _logger = logger;
             _parameterize = parameterize;
             _generateContextAccessors = generateContextAccessors;
-            if (_generateContextAccessors)
-            {
-                _contextParameterReplacingExpressionVisitor = new ContextParameterReplacingExpressionVisitor(contextType);
-            }
+            // The entry method will take care of populating this field always. So accesses should be safe.
+            _evaluatableExpressions = null!;
+            // Value won't be accessed when condition is not met.
+            _contextParameterReplacingExpressionVisitor = _generateContextAccessors
+                ? new ContextParameterReplacingExpressionVisitor(contextType)
+                : null!;
         }
 
         /// <summary>
@@ -92,7 +96,8 @@ namespace Microsoft.EntityFrameworkCore.Query.Internal
         ///     any release. You should only use it directly in your code with extreme caution and knowing that
         ///     doing so can result in application failures when updating to a new Entity Framework Core release.
         /// </summary>
-        public override Expression Visit(Expression expression)
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("expression")]
+        public override Expression? Visit(Expression? expression)
         {
             if (expression == null)
             {
@@ -215,7 +220,7 @@ namespace Microsoft.EntityFrameworkCore.Query.Internal
             }
         }
 
-        private Expression TryGetConstantValue(Expression expression)
+        private Expression? TryGetConstantValue(Expression expression)
         {
             if (_evaluatableExpressions.ContainsKey(expression))
             {
@@ -367,7 +372,8 @@ namespace Microsoft.EntityFrameworkCore.Query.Internal
             return expression;
         }
 
-        private object GetValue(Expression expression, out string parameterName)
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("expression")]
+        private object? GetValue(Expression? expression, out string? parameterName)
         {
             parameterName = null;
 
@@ -473,6 +479,8 @@ namespace Microsoft.EntityFrameworkCore.Query.Internal
                 _evaluatableExpressionFilter = evaluatableExpressionFilter;
                 _model = model;
                 _parameterize = parameterize;
+                // The entry method will take care of populating this field always. So accesses should be safe.
+                _evaluatableExpressions = null!;
             }
 
             public IDictionary<Expression, bool> Find(Expression expression)

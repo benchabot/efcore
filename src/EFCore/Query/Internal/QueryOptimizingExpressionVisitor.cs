@@ -7,6 +7,8 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Utilities;
 
+#nullable enable
+
 namespace Microsoft.EntityFrameworkCore.Query.Internal
 {
     /// <summary>
@@ -193,7 +195,11 @@ namespace Microsoft.EntityFrameworkCore.Query.Internal
             return base.VisitUnary(unaryExpression);
         }
 
-        private bool TryExtractEqualityOperands(Expression expression, out Expression left, out Expression right, out bool negated)
+        private bool TryExtractEqualityOperands(
+            Expression expression,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Expression? left,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Expression? right,
+            out bool negated)
         {
             (left, right, negated) = (default, default, default);
 
@@ -223,14 +229,18 @@ namespace Microsoft.EntityFrameworkCore.Query.Internal
                         && methodCallExpression.Object.Type == methodCallExpression.Arguments[0].Type)
                     {
                         (left, right) = (methodCallExpression.Object, methodCallExpression.Arguments[0]);
+
+                        return true;
                     }
                     else if (methodCallExpression.Arguments.Count == 2
                         && methodCallExpression.Arguments[0].Type == methodCallExpression.Arguments[1].Type)
                     {
                         (left, right) = (methodCallExpression.Arguments[0], methodCallExpression.Arguments[1]);
+
+                        return true;
                     }
 
-                    return true;
+                    return false;
                 }
 
                 case UnaryExpression unaryExpression
@@ -245,7 +255,7 @@ namespace Microsoft.EntityFrameworkCore.Query.Internal
             return false;
         }
 
-        private Expression TryOptimizeMemberAccessOverConditional(Expression expression)
+        private Expression? TryOptimizeMemberAccessOverConditional(Expression expression)
         {
             // Simplify (a != null ? new { Member = b, ... } : null).Member
             // to a != null ? b : null

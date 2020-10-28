@@ -15,6 +15,8 @@ using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Utilities;
 
+#nullable enable
+
 namespace Microsoft.EntityFrameworkCore.Query
 {
     /// <summary>
@@ -64,7 +66,7 @@ namespace Microsoft.EntityFrameworkCore.Query
             [NotNull] IEntityType entityType,
             [NotNull] Expression valueBufferExpression,
             bool nullable,
-            [CanBeNull] LambdaExpression materializationCondition)
+            [CanBeNull] LambdaExpression? materializationCondition)
         {
             Check.NotNull(entityType, nameof(entityType));
             Check.NotNull(valueBufferExpression, nameof(valueBufferExpression));

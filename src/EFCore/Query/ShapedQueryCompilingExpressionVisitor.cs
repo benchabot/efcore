@@ -17,6 +17,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Utilities;
 
+#nullable enable
+
 namespace Microsoft.EntityFrameworkCore.Query
 {
     /// <summary>
@@ -41,7 +43,7 @@ namespace Microsoft.EntityFrameworkCore.Query
         private static readonly PropertyInfo _cancellationTokenMemberInfo
             = typeof(QueryContext).GetProperty(nameof(QueryContext.CancellationToken));
 
-        private readonly Expression _cancellationTokenParameter;
+        private readonly Expression? _cancellationTokenParameter;
         private readonly EntityMaterializerInjectingExpressionVisitor _entityMaterializerInjectingExpressionVisitor;
         private readonly ConstantVerifyingExpressionVisitor _constantVerifyingExpressionVisitor;
 
@@ -161,7 +163,8 @@ namespace Microsoft.EntityFrameworkCore.Query
             await using var enumerator = asyncEnumerable.GetAsyncEnumerator(cancellationToken);
             if (!(await enumerator.MoveNextAsync().ConfigureAwait(false)))
             {
-                return default;
+                // There is currently no way to specify that this method can return Task<TSource?> where TSource is not constrainted.
+                return default!;
             }
 
             var result = enumerator.Current;
@@ -275,7 +278,7 @@ namespace Microsoft.EntityFrameworkCore.Query
                         : base.VisitExtension(extensionExpression);
             }
 
-            private static Expression RemoveConvert(Expression expression)
+            private static Expression? RemoveConvert(Expression? expression)
             {
                 while (expression != null
                     && (expression.NodeType == ExpressionType.Convert
@@ -476,7 +479,7 @@ namespace Microsoft.EntityFrameworkCore.Query
                 ParameterExpression materializationContextVariable,
                 ParameterExpression concreteEntityTypeVariable,
                 ParameterExpression instanceVariable,
-                ParameterExpression entryVariable)
+                ParameterExpression? entryVariable)
             {
                 var entityType = entityShaperExpression.EntityType;
 

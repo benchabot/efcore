@@ -5,13 +5,15 @@ using System;
 using System.Threading;
 using JetBrains.Annotations;
 
+#nullable enable
+
 namespace Microsoft.EntityFrameworkCore.Internal
 {
     internal static class NonCapturingLazyInitializer
     {
         public static TValue EnsureInitialized<TParam, TValue>(
-            [CanBeNull] ref TValue target,
-            [CanBeNull] TParam param,
+            [CanBeNull] ref TValue? target,
+            [NotNull] TParam param,
             [NotNull] Func<TParam, TValue> valueFactory)
             where TValue : class
         {
@@ -23,13 +25,13 @@ namespace Microsoft.EntityFrameworkCore.Internal
 
             Interlocked.CompareExchange(ref target, valueFactory(param), null);
 
-            return target!;
+            return target;
         }
 
         public static TValue EnsureInitialized<TParam1, TParam2, TValue>(
-            [CanBeNull] ref TValue target,
-            [CanBeNull] TParam1 param1,
-            [CanBeNull] TParam2 param2,
+            [CanBeNull] ref TValue? target,
+            [NotNull] TParam1 param1,
+            [NotNull] TParam2 param2,
             [NotNull] Func<TParam1, TParam2, TValue> valueFactory)
             where TValue : class
         {
@@ -41,11 +43,11 @@ namespace Microsoft.EntityFrameworkCore.Internal
 
             Interlocked.CompareExchange(ref target, valueFactory(param1, param2), null);
 
-            return target!;
+            return target;
         }
 
         public static TValue EnsureInitialized<TValue>(
-            [CanBeNull] ref TValue target,
+            [CanBeNull] ref TValue? target,
             [NotNull] TValue value)
             where TValue : class
         {
@@ -57,12 +59,12 @@ namespace Microsoft.EntityFrameworkCore.Internal
 
             Interlocked.CompareExchange(ref target, value, null);
 
-            return target!;
+            return target;
         }
 
         public static TValue EnsureInitialized<TParam, TValue>(
-            [CanBeNull] ref TValue target,
-            [CanBeNull] TParam param,
+            [CanBeNull] ref TValue? target,
+            [NotNull] TParam param,
             [NotNull] Action<TParam> valueFactory)
             where TValue : class
         {

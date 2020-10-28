@@ -9,6 +9,8 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Utilities;
 
+#nullable enable
+
 namespace Microsoft.EntityFrameworkCore.Query
 {
     /// <summary>
@@ -56,7 +58,8 @@ namespace Microsoft.EntityFrameworkCore.Query
         }
 
         /// <inheritdoc />
-        public override Expression Visit(Expression expression)
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("expression")]
+        public override Expression? Visit(Expression? expression)
         {
             if (expression == null
                 || expression is ShapedQueryExpression
